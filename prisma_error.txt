@@ -1,0 +1,25 @@
+﻿node.exe : Prisma schema 
+loaded from 
+prisma\schema.prisma.
+At line:1 char:1
++ & 
+"C:\nvm4w\nodejs/node.exe" "
+C:\nvm4w\nodejs/node_modules
+/npm/bin/np ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (Prism  
+  a schema l...\schema.pr   
+ isma.:String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+
+Γ£ö Generated Prisma Client (v7.4.1) to .\node_modules\@prisma\client in 162ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+

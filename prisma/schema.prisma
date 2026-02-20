@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  password      String?
+  image         String?
+  role          String    @default("USER") // USER or ADMIN
+  results       Result[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Quiz {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  category    String
+  difficulty  String     // Easy, Medium, Hard
+  questions   Question[]
+  results     Result[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Question {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  quizId    String   @db.ObjectId
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text      String
+  code      String?  // Optional code block for the question
+  type      String   @default("MCQ") // Could expand later
+  options   Option[]
+}
+
+model Option {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  questionId  String   @db.ObjectId
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text        String
+  isCorrect   Boolean
+}
+
+model Result {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId    String   @db.ObjectId
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score     Int
+  total     Int
+  percentage Float
+  status    String   // PASS or FAIL
+  timeTaken Int?     // Time taken in seconds
+  createdAt DateTime @default(now())
+}

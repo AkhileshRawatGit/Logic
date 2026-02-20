@@ -1,0 +1,35 @@
+﻿
+> quizapp@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 8.1s
+  Running TypeScript ...
+  Collecting page data using 9 workers ...
+  Generating static pages using 9 workers (0/7) ...
+  Generating static pages using 9 workers (1/7) 
+  Generating static pages using 9 workers (3/7) 
+  Generating static pages using 9 workers (5/7) 
+Γ£ô Generating static pages using 9 workers (7/7) in 3.9s
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /admin/quiz/new
+Γö£ ╞Æ /api/auth/[...nextauth]
+Γö£ ╞Æ /dashboard
+Γö£ Γùï /login
+Γö£ ╞Æ /quiz/[id]
+Γö£ Γùï /register
+Γöö ╞Æ /results/[id]
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+
