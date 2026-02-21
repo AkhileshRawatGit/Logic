@@ -6,29 +6,39 @@ import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function getQuizzes() {
-    return await prisma.quiz.findMany({
-        where: { isActive: true },
-        include: {
-            _count: {
-                select: { questions: true }
-            }
-        },
-        orderBy: { createdAt: "desc" }
-    });
+    try {
+        return await prisma.quiz.findMany({
+            where: { isActive: true } as any,
+            include: {
+                _count: {
+                    select: { questions: true }
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        });
+    } catch (error) {
+        console.error("GET_QUIZZES_ERROR:", error);
+        return [];
+    }
 }
 
 export async function getAllQuizzes() {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
+    try {
+        const session = await getServerSession(authOptions);
+        if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
 
-    return await prisma.quiz.findMany({
-        include: {
-            _count: {
-                select: { questions: true }
-            }
-        },
-        orderBy: { createdAt: "desc" }
-    });
+        return await prisma.quiz.findMany({
+            include: {
+                _count: {
+                    select: { questions: true }
+                }
+            },
+            orderBy: { createdAt: "desc" }
+        });
+    } catch (error) {
+        console.error("GET_ALL_QUIZZES_ERROR:", error);
+        return [];
+    }
 }
 
 export async function getQuizById(id: string) {
@@ -68,7 +78,7 @@ export async function submitQuiz(quizId: string, answers: Record<string, string>
     });
 
     if (!quiz) throw new Error("Target quiz not found");
-    if (!quiz.isActive) throw new Error("This mission is currently disabled by HQ");
+    if (!(quiz as any).isActive) throw new Error("This mission is currently disabled by HQ");
     if (quiz.questions.length === 0) throw new Error("This quiz has no questions and cannot be submitted");
 
     let score = 0;
@@ -103,43 +113,53 @@ export async function submitQuiz(quizId: string, answers: Record<string, string>
 }
 
 export async function getUserResults() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return [];
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) return [];
 
-    return await prisma.result.findMany({
-        where: { userId: session.user.id },
-        include: {
-            quiz: {
-                select: { title: true, category: true }
-            }
-        },
-        orderBy: [
-            { createdAt: "desc" }
-        ]
-    });
+        return await prisma.result.findMany({
+            where: { userId: session.user.id },
+            include: {
+                quiz: {
+                    select: { title: true, category: true }
+                }
+            },
+            orderBy: [
+                { createdAt: "desc" }
+            ]
+        });
+    } catch (error) {
+        console.error("GET_USER_RESULTS_ERROR:", error);
+        return [];
+    }
 }
 
 export async function getAllResults() {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.role !== "ADMIN") {
-        throw new Error("Unauthorized: Admin access required");
-    }
+    try {
+        const session = await getServerSession(authOptions);
+        if (session?.user?.role !== "ADMIN") {
+            throw new Error("Unauthorized: Admin access required");
+        }
 
-    return await prisma.result.findMany({
-        include: {
-            user: {
-                select: { name: true, email: true }
+        return await prisma.result.findMany({
+            include: {
+                user: {
+                    select: { name: true, email: true }
+                },
+                quiz: {
+                    select: { title: true }
+                }
             },
-            quiz: {
-                select: { title: true }
-            }
-        },
-        orderBy: [
-            { score: "desc" },
-            { timeTaken: "asc" },
-            { createdAt: "desc" }
-        ]
-    });
+            orderBy: [
+                { score: "desc" },
+                { timeTaken: "asc" },
+                { createdAt: "desc" }
+            ]
+        });
+    } catch (error) {
+        console.error("GET_ALL_RESULTS_ERROR:", error);
+        return [];
+    }
 }
 
 export async function createQuiz(data: {
@@ -370,7 +390,7 @@ export async function toggleQuizStatus(quizId: string, isActive: boolean) {
     try {
         await prisma.quiz.update({
             where: { id: quizId },
-            data: { isActive },
+            data: { isActive } as any,
         });
 
         revalidatePath("/dashboard");

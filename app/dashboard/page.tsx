@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { getQuizzes, getUserResults, getAllResults } from "@/actions/quiz";
 import Link from "next/link";
 import { Zap, Clock, Trophy, Target, ArrowRight, BookOpen, PlusCircle, LayoutDashboard, Database, Activity, User, Shield } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
@@ -30,7 +29,7 @@ export default async function DashboardPage() {
                     <div className="space-y-4">
                         <h2 className="text-xs font-black uppercase tracking-[0.5em] text-primary">Intelligence Command</h2>
                         <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase whitespace-nowrap">
-                            WELCOME, {session.user?.name ? session.user.name.split(' ')[0] : 'AGENT'}
+                            WELCOME, {session?.user?.name ? session.user.name.split(' ')[0] : 'AGENT'}
                         </h1>
                     </div>
                 </div>
