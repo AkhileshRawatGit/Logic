@@ -27,6 +27,7 @@ model Quiz {
   difficulty  String     // Easy, Medium, Hard
   questions   Question[]
   results     Result[]
+  isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }

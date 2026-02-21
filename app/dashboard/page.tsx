@@ -28,7 +28,7 @@ export default async function DashboardPage() {
                 {/* Profile / Stats Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-12">
                     <div className="space-y-4">
-                        <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-primary">Intelligence Command</h2>
+                        <h2 className="text-xs font-black uppercase tracking-[0.5em] text-primary">Intelligence Command</h2>
                         <h1 className="text-5xl md:text-7xl font-bold tracking-tighter uppercase whitespace-nowrap">
                             WELCOME, {session.user?.name ? session.user.name.split(' ')[0] : 'AGENT'}
                         </h1>
@@ -41,14 +41,14 @@ export default async function DashboardPage() {
                         <div className="flex items-center justify-between border-b border-white/5 pb-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                <h3 className="text-xs font-black uppercase tracking-[0.3em]">Active Missions</h3>
+                                <h3 className="text-sm font-black uppercase tracking-[0.3em]">Active Missions</h3>
                             </div>
                             {session.user?.role === "ADMIN" && (
                                 <Link
-                                    href="/admin/quiz/new"
-                                    className="px-6 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-primary transition-all flex items-center gap-2"
+                                    href="/admin/quiz"
+                                    className="px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest rounded-full hover:bg-primary transition-all flex items-center gap-2"
                                 >
-                                    <PlusCircle className="w-3.5 h-3.5" /> Deployment
+                                    <LayoutDashboard className="w-3.5 h-3.5" /> Manage Missions
                                 </Link>
                             )}
                         </div>
@@ -63,10 +63,10 @@ export default async function DashboardPage() {
                                     >
                                         <div className="space-y-6">
                                             <div className="flex justify-between items-start">
-                                                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/10 text-gray-400">
+                                                <span className="text-xs font-black uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/10 text-gray-400">
                                                     {quiz.category}
                                                 </span>
-                                                <div className="text-[10px] font-mono text-gray-600 uppercase tracking-widest">
+                                                <div className="text-xs font-mono text-gray-600 uppercase tracking-widest">
                                                     {quiz.difficulty} Level
                                                 </div>
                                             </div>
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
                                         </div>
 
                                         <div className="flex items-center justify-between pt-6">
-                                            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-600">
+                                            <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-600">
                                                 <span className="flex items-center gap-1.5"><Database className="w-3 h-3" /> {quiz._count.questions} Vectors</span>
                                                 <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> 15m</span>
                                             </div>
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
                     <div className="lg:col-span-4 space-y-12">
                         <div className="flex items-center gap-3 border-b border-white/5 pb-6">
                             <div className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-primary shadow-[0_0_5px_#00f2ff]' : 'bg-secondary'}`} />
-                            <h3 className="text-xs font-black uppercase tracking-[0.3em]">
+                            <h3 className="text-sm font-black uppercase tracking-[0.3em]">
                                 {isAdmin ? 'ADMIN COMMAND: ALL SCORES' : 'MISSION STATUS'}
                             </h3>
                         </div>
@@ -120,8 +120,8 @@ export default async function DashboardPage() {
                                                         <User className="w-4 h-4 text-gray-400" />
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-xs font-black uppercase tracking-widest leading-none">{result.user?.name || 'Anonymous'}</span>
-                                                        <span className="text-[8px] text-gray-500 tracking-widest uppercase mt-1">{result.user?.email || 'No Email'}</span>
+                                                        <span className="text-sm font-black uppercase tracking-widest leading-none">{result.user?.name || 'Anonymous'}</span>
+                                                        <span className="text-[10px] text-gray-500 tracking-widest uppercase mt-1">{result.user?.email || 'No Email'}</span>
                                                     </div>
                                                 </div>
                                                 <div className={`text-lg font-black ${result.status === 'PASS' ? 'text-primary' : 'text-red-500'}`}>
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
                                                 </div>
                                             </div>
                                             <div className="h-px bg-white/5 w-full" />
-                                            <div className="flex items-center justify-between text-[8px] font-bold uppercase tracking-[0.2em] text-gray-500">
+                                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
                                                 <span>MISSION: {result.quiz?.title || 'Unknown Quiz'}</span>
                                                 <div className="flex items-center gap-4">
                                                     {typeof result.timeTaken === 'number' && (
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
                                     ))
                                 ) : (
                                     <div className="glass p-12 rounded-3xl border border-dashed border-white/10 text-center">
-                                        <p className="text-gray-600 text-[10px] font-black uppercase tracking-widest text-glow">No Data Transmitted Yet</p>
+                                        <p className="text-gray-600 text-xs font-black uppercase tracking-widest text-glow">No Data Transmitted Yet</p>
                                     </div>
                                 )
                             ) : (
@@ -151,8 +151,8 @@ export default async function DashboardPage() {
                                         <Shield className="w-6 h-6 text-secondary" />
                                     </div>
                                     <div className="space-y-2">
-                                        <p className="text-white font-bold uppercase tracking-widest text-[10px]">Encrypted Phase</p>
-                                        <p className="text-gray-500 text-[9px] uppercase tracking-widest leading-relaxed">
+                                        <p className="text-white font-bold uppercase tracking-widest text-sm">Encrypted Phase</p>
+                                        <p className="text-gray-500 text-xs uppercase tracking-widest leading-relaxed">
                                             Your results are being secured. Participants cannot view logs during this phase.
                                         </p>
                                     </div>

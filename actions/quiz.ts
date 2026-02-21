@@ -7,6 +7,21 @@ import { revalidatePath } from "next/cache";
 
 export async function getQuizzes() {
     return await prisma.quiz.findMany({
+        where: { isActive: true },
+        include: {
+            _count: {
+                select: { questions: true }
+            }
+        },
+        orderBy: { createdAt: "desc" }
+    });
+}
+
+export async function getAllQuizzes() {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role !== "ADMIN") throw new Error("Unauthorized");
+
+    return await prisma.quiz.findMany({
         include: {
             _count: {
                 select: { questions: true }
@@ -53,6 +68,7 @@ export async function submitQuiz(quizId: string, answers: Record<string, string>
     });
 
     if (!quiz) throw new Error("Target quiz not found");
+    if (!quiz.isActive) throw new Error("This mission is currently disabled by HQ");
     if (quiz.questions.length === 0) throw new Error("This quiz has no questions and cannot be submitted");
 
     let score = 0;
@@ -176,5 +192,191 @@ export async function createQuiz(data: {
     } catch (error: any) {
         console.error("CRITICAL ERROR IN CREATE_QUIZ:", error);
         throw new Error(error.message || "Failed to deploy mission to database");
+    }
+}
+
+export async function deleteQuiz(quizId: string) {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role !== "ADMIN") {
+        throw new Error("Unauthorized: Admin access required");
+    }
+
+    try {
+        // Delete the quiz (cascade will delete questions and options)
+        await prisma.quiz.delete({
+            where: { id: quizId },
+        });
+
+        console.log("Quiz deleted successfully:", quizId);
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error: any) {
+        console.error("CRITICAL ERROR IN DELETE_QUIZ:", error);
+        throw new Error(error.message || "Failed to delete quiz");
+    }
+}
+
+export async function updateQuiz(quizId: string, data: {
+    title: string;
+    description: string;
+    category: string;
+    difficulty: string;
+    questions: {
+        id?: string;
+        text: string;
+        code?: string | null;
+        options: { id?: string; text: string; isCorrect: boolean }[];
+    }[];
+}) {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role !== "ADMIN") {
+        throw new Error("Unauthorized: Admin access required");
+    }
+
+    if (!data.title || data.questions.length === 0) {
+        throw new Error("Invalid quiz data: Title and at least one question are required");
+    }
+
+    try {
+        console.log("Updating quiz:", quizId);
+
+        // First get existing quiz with questions
+        const existingQuiz = await prisma.quiz.findUnique({
+            where: { id: quizId },
+            include: {
+                questions: {
+                    include: {
+                        options: true
+                    }
+                }
+            }
+        });
+
+        if (!existingQuiz) {
+            throw new Error("Quiz not found");
+        }
+
+        // Separate questions into existing and new
+        const existingQuestionIds = new Set(existingQuiz.questions.map(q => q.id));
+        const updatedQuestionIds = new Set(data.questions.filter(q => q.id).map(q => q.id));
+
+        // Questions to delete (exist in DB but not in updated data)
+        const questionsToDelete = existingQuiz.questions
+            .filter(q => !updatedQuestionIds.has(q.id))
+            .map(q => q.id);
+
+        // Delete questions that are not in the updated data
+        if (questionsToDelete.length > 0) {
+            await prisma.question.deleteMany({
+                where: {
+                    id: { in: questionsToDelete }
+                }
+            });
+        }
+
+        // Update or create questions
+        for (const questionData of data.questions) {
+            if (questionData.id && existingQuestionIds.has(questionData.id)) {
+                // Update existing question
+                const existingQuestion = existingQuiz.questions.find(q => q.id === questionData.id);
+
+                await prisma.question.update({
+                    where: { id: questionData.id },
+                    data: {
+                        text: questionData.text,
+                        code: questionData.code || null,
+                    }
+                });
+
+                // Update options for this question
+                const existingOptionIds = new Set(existingQuestion?.options.map(o => o.id) || []);
+                const updatedOptionIds = new Set(questionData.options.filter(o => o.id).map(o => o.id));
+
+                // Delete options not in updated data
+                const optionsToDelete = [...existingOptionIds].filter(id => !updatedOptionIds.has(id));
+                if (optionsToDelete.length > 0) {
+                    await prisma.option.deleteMany({
+                        where: { id: { in: optionsToDelete } }
+                    });
+                }
+
+                // Update or create options
+                for (const optionData of questionData.options) {
+                    if (optionData.id && existingOptionIds.has(optionData.id)) {
+                        // Update existing option
+                        await prisma.option.update({
+                            where: { id: optionData.id },
+                            data: {
+                                text: optionData.text,
+                                isCorrect: optionData.isCorrect,
+                            }
+                        });
+                    } else {
+                        // Create new option
+                        await prisma.option.create({
+                            data: {
+                                questionId: questionData.id,
+                                text: optionData.text,
+                                isCorrect: optionData.isCorrect,
+                            }
+                        });
+                    }
+                }
+            } else {
+                // Create new question
+                const newQuestion = await prisma.question.create({
+                    data: {
+                        quizId: quizId,
+                        text: questionData.text,
+                        code: questionData.code || null,
+                        options: {
+                            create: questionData.options.map((o: any) => ({
+                                text: o.text,
+                                isCorrect: o.isCorrect,
+                            })),
+                        },
+                    }
+                });
+            }
+        }
+
+        // Update quiz metadata
+        await prisma.quiz.update({
+            where: { id: quizId },
+            data: {
+                title: data.title,
+                description: data.description || null,
+                category: data.category,
+                difficulty: data.difficulty,
+            }
+        });
+
+        console.log("Quiz updated successfully:", quizId);
+        revalidatePath("/dashboard");
+        revalidatePath(`/quiz/${quizId}`);
+        return { success: true };
+    } catch (error: any) {
+        console.error("CRITICAL ERROR IN UPDATE_QUIZ:", error);
+        throw new Error(error.message || "Failed to update quiz");
+    }
+}
+
+export async function toggleQuizStatus(quizId: string, isActive: boolean) {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.role !== "ADMIN") {
+        throw new Error("Unauthorized: Admin access required");
+    }
+
+    try {
+        await prisma.quiz.update({
+            where: { id: quizId },
+            data: { isActive },
+        });
+
+        revalidatePath("/dashboard");
+        revalidatePath("/admin/quiz");
+        return { success: true };
+    } catch (error: any) {
+        throw new Error("Failed to update status");
     }
 }

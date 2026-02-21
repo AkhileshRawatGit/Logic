@@ -45,7 +45,7 @@ export default function Home() {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass border border-white/10 text-[10px] uppercase font-bold tracking-[0.3em] text-primary"
+                            className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass border border-white/10 text-xs uppercase font-bold tracking-[0.3em] text-primary"
                         >
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -78,9 +78,10 @@ export default function Home() {
                             transition={{ duration: 1.2, delay: 0.8 }}
                             className="text-gray-400 text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed font-light"
                         >
-                            The digital frontier awaits. Navigate through intricate logic gates,
-                            decode complexities, and prove your computational prowess in the most
-                            elite ACM challenge of the year.
+                            Welcome to Round 1 of Logic Quest, officially conducted by ACM.
+                            Step into the digital arena where your analytical skills meet high-stakes
+                            quiz challenges. Master the logic, outpace the clock, and prove your
+                            computational dominance to qualify for the next evolution.
                         </motion.p>
 
                         <motion.div
@@ -187,7 +188,7 @@ export default function Home() {
             </section>
 
             <footer className="px-6 py-12 border-t border-white/5 text-center">
-                <p className="text-[10px] uppercase tracking-[0.5em] text-gray-600 font-bold">
+                <p className="text-xs uppercase tracking-[0.5em] text-gray-600 font-bold">
                     © 2026 ACM CHAPTER - LOGIC QUEST DIVISION
                 </p>
             </footer>
